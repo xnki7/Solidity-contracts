@@ -1,69 +1,93 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 
-contract Twitter{
-    struct tweet{
-        uint id;
+contract dwiter {
+    struct dweet {
+        uint256 id;
         address from;
         string message;
-        uint timeStamp;
+        uint256 timeStamp;
     }
 
-    uint id;
+    mapping(address => dweet) public userDweets;
+    mapping(address => dweet[]) public addressDweets;
+    mapping(address => address[]) public followings;
+    mapping(address => address[]) public followers;
+    mapping(address => dweet[]) public bookMarks;
+    mapping(address => dweet[]) public followingsDweets;
 
-    tweet[] public tweets;
+    dweet[] public dweets;
+    uint256 public ID = 0;
 
-    mapping(address => tweet) userTweets;
-    mapping(address => address[]) followers;
-    mapping(address => address[]) following;
-    mapping(address => tweet[]) bookmarks;
+    event newDweet (address from, string message, uint256 id, uint256 timeStamp);
 
-    event newTweet(address user, string message, uint timeStamp, uint id) ;
-
-
-    function createTweet(string memory _message) public{
-        id++;
-        uint time = block.timestamp;
-        userTweets[msg.sender] = tweet(id, msg.sender, _message, time);
-        tweets.push(userTweets[msg.sender]);
-
-        emit newTweet(msg.sender, _message, time, id);
+    function createDweet(string memory _message) public {
+        ID++;
+        uint256 timeStamp = block.timestamp;
+        string memory Message = _message;
+        dweet memory Dweet = dweet(ID, msg.sender, Message, timeStamp);
+        userDweets[msg.sender] = Dweet;
+        dweets.push(Dweet);
+        addressDweets[msg.sender].push(Dweet);
+        for(uint256 i = 0 ; i<followers[msg.sender].length; i++){
+            followingsDweets[followers[msg.sender][i]].push(Dweet);
+        }
+        emit newDweet (msg.sender, Message, ID, timeStamp);
     }
 
-    function getTweets(uint _id) public view returns(tweet memory){
-        return(tweets[_id]);
-    }
-
-    function follow(address _user) public payable{
-        followers[_user].push(msg.sender);
-        following[msg.sender].push(_user);
-    }
-
-    function getFollowers(address _user) public view returns(address[] memory){
-        return(followers[_user]);
-    }
-
-    function getFollowing(address _user) public view returns(address[] memory){
-        return(following[_user]);
-    }
-
-    function retweet(uint _id) public{
-        id++;
+    function addBookMark(uint256 _id) public {
         _id = _id - 1;
-        string memory message = tweets[_id].message;
-        uint time = block.timestamp;
-        userTweets[msg.sender] = tweet(id, msg.sender, message, block.timestamp);
-        tweets.push(userTweets[msg.sender]);
-        emit newTweet(msg.sender, message, time, id);
+        dweet memory Dweet = dweets[_id];
+        bookMarks[msg.sender].push(Dweet);
     }
 
-    function addBookmark(uint _id) public{
+    function reDweet(uint256 _id) public {
         _id = _id - 1;
-        bookmarks[msg.sender].push(tweets[_id]);
+        dweet memory Dweet = dweets[_id];
+        string memory Message = Dweet.message;
+        createDweet(Message);
     }
 
-    function getBookmarks() public view returns(tweet[] memory){
-        return(bookmarks[msg.sender]);
+    function follow(address _profile) public payable {
+        followers[_profile].push(msg.sender);
+        followings[msg.sender].push(_profile);
+    }
+
+    function getDweetByAdderss(address _profile)
+        public
+        view
+        returns(dweet[] memory)
+    {
+        return(addressDweets[_profile]);
+    }
+
+    function getFollowers(address _profile)
+        public
+        view
+        returns (address[] memory)
+    {
+        return (followers[_profile]);
+    }
+
+    function getFollowings(address _profile)
+        public
+        view
+        returns (address[] memory)
+    {
+        return (followings[_profile]);
+    }
+
+    function getDweetByID(uint256 _id) public view returns (dweet memory) {
+        _id = _id - 1;
+        return (dweets[_id]);
+    }
+
+    function getBookMark() public view returns (dweet[] memory) {
+        return (bookMarks[msg.sender]);
+    }
+
+    function getFollowingDweets() public view returns (dweet[] memory){
+        return(followingsDweets[msg.sender]);
     }
 
 }
