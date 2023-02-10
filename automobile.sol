@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 
 contract Automotive{
@@ -10,7 +11,6 @@ contract Automotive{
 
     event Purchase (address buyer, string make, string model, uint price);
     
-
     constructor() {
         owner = msg.sender;
     }
