@@ -34,9 +34,11 @@ contract Insurence{
         claims[policyholder] = 0;
     }
 
+
     function getPolicy(address policyholder) public view returns (uint){
         return policies[policyholder];
     }
+
 
     function getClaim(address policyholder) public view returns(uint){
         return claims[policyholder];
