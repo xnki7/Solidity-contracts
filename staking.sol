@@ -23,7 +23,7 @@ contract staking{
     mapping(uint => uint) public tiers;
     uint[] public lockPeriods;
 
-    constructo()
+    constructor() payable{
     owner = msg.sender;
         currentPositionId = 0;
 
